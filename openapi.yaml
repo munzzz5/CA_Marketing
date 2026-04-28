@@ -1,21 +1,38 @@
 openapi: 3.1.0
 info:
   title: Chaat Anna Marketing Intelligence API
-  version: 2.1.0
+  version: 2.0.0
+  description: API contract for keyword-driven marketing intelligence workflows.
 servers:
-  - url: http://localhost:8000
+  - url: https://api.chaatanna.local
 paths:
   /keywords:
     get:
       summary: List keywords
       responses:
         '200':
-          description: OK
+          description: Keyword list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Keyword'
     post:
       summary: Create keyword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKeywordRequest'
       responses:
         '201':
-          description: Created
+          description: Keyword created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Keyword'
   /keywords/{id}:
     patch:
       summary: Update keyword
@@ -23,126 +40,313 @@ paths:
         - in: path
           name: id
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKeywordRequest'
       responses:
         '200':
-          description: Updated
+          description: Keyword updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Keyword'
     delete:
       summary: Delete keyword
       parameters:
         - in: path
           name: id
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
         '204':
-          description: Deleted
-
-  /keyword-groups:
-    get:
-      summary: List keyword groups
-      responses:
-        '200': { description: OK }
-    post:
-      summary: Create keyword group
-      responses:
-        '201': { description: Created }
-
-  /keyword-groups/{group_id}/keywords:
-    get:
-      summary: List keywords in group
-      parameters:
-        - in: path
-          name: group_id
-          required: true
-          schema: { type: integer }
-      responses:
-        '200': { description: OK }
-    post:
-      summary: Add keyword to group
-      parameters:
-        - in: path
-          name: group_id
-          required: true
-          schema: { type: integer }
-      responses:
-        '201': { description: Created }
-
-  /keyword-groups/{group_id}/keywords/{keyword_id}:
-    delete:
-      summary: Remove keyword from group
-      parameters:
-        - in: path
-          name: group_id
-          required: true
-          schema: { type: integer }
-        - in: path
-          name: keyword_id
-          required: true
-          schema: { type: integer }
-      responses:
-        '204': { description: Deleted }
+          description: Keyword deleted
 
   /scrape/run:
     post:
       summary: Run scraping for active keywords
       responses:
-        '200': { description: OK }
-
-  /classify/run:
-    post:
-      summary: Classify scraped content
-      responses:
-        '200': { description: OK }
+        '202':
+          description: Scrape job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapeRunResponse'
 
   /scrape/results:
     get:
-      summary: List scrape results
+      summary: List scraped content results
+      parameters:
+        - in: query
+          name: keyword_id
+          schema:
+            type: integer
+        - in: query
+          name: content_type
+          schema:
+            $ref: '#/components/schemas/ContentType'
       responses:
-        '200': { description: OK }
+        '200':
+          description: Scrape results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScrapedContent'
 
   /content:
     get:
-      summary: List content
+      summary: Get content catalog
       responses:
-        '200': { description: OK }
+        '200':
+          description: Content list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ScrapedContent'
 
   /content/{id}:
     get:
-      summary: Get one content item
+      summary: Get content item
       parameters:
         - in: path
           name: id
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        '200': { description: OK }
+        '200':
+          description: Content item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapedContent'
 
   /ideas:
     get:
-      summary: List ideas
+      summary: List generated ideas
+      parameters:
+        - in: query
+          name: idea_type
+          schema:
+            $ref: '#/components/schemas/IdeaType'
       responses:
-        '200': { description: OK }
+        '200':
+          description: Idea list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GeneratedIdea'
 
   /ideas/generate/{content_id}:
     post:
-      summary: Generate ideas for one content item
+      summary: Generate idea(s) for existing content
       parameters:
         - in: path
           name: content_id
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateIdeasRequest'
       responses:
-        '201': { description: Created }
+        '201':
+          description: Ideas generated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GeneratedIdea'
 
   /ideas/custom:
     post:
-      summary: Generate custom ideas by prompt/filters
+      summary: Generate ideas from custom prompt and filters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomIdeaRequest'
       responses:
-        '201': { description: Created }
+        '201':
+          description: Ideas generated from custom prompt
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GeneratedIdea'
 
-  /digest/preview:
-    get:
-      summary: Preview digest sections
-      responses:
-        '200': { description: OK }
+components:
+  schemas:
+    KeywordCategory:
+      type: string
+      enum: [Events, Trends, Food, Weather, B2B Leads, Local, Competitor, Custom]
+
+    ContentType:
+      type: string
+      enum: [Event, Trend, News, Meme, Opportunity]
+
+    IdeaType:
+      type: string
+      enum: [PromotionalOffer, CampaignIdea, SocialMediaHook, B2BSalesIdea]
+
+    Keyword:
+      type: object
+      required: [id, keyword, priority, is_active, created_at]
+      properties:
+        id:
+          type: integer
+        keyword:
+          type: string
+        category:
+          $ref: '#/components/schemas/KeywordCategory'
+        priority:
+          type: integer
+          minimum: 1
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    CreateKeywordRequest:
+      type: object
+      required: [keyword]
+      properties:
+        keyword:
+          type: string
+        category:
+          $ref: '#/components/schemas/KeywordCategory'
+        priority:
+          type: integer
+          minimum: 1
+          default: 1
+        is_active:
+          type: boolean
+          default: true
+
+    UpdateKeywordRequest:
+      type: object
+      properties:
+        keyword:
+          type: string
+        category:
+          $ref: '#/components/schemas/KeywordCategory'
+        priority:
+          type: integer
+          minimum: 1
+        is_active:
+          type: boolean
+
+    ScrapedContent:
+      type: object
+      required: [id, keyword_id, title, source, created_at]
+      properties:
+        id:
+          type: integer
+        keyword_id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        source:
+          type: string
+        source_url:
+          type: string
+          format: uri
+        content_type:
+          $ref: '#/components/schemas/ContentType'
+        relevance_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        published_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+
+    GeneratedIdea:
+      type: object
+      required: [id, content_id, idea_type, title, description, created_at]
+      properties:
+        id:
+          type: integer
+        content_id:
+          type: integer
+        idea_type:
+          $ref: '#/components/schemas/IdeaType'
+        title:
+          type: string
+        description:
+          type: string
+        execution_notes:
+          type: string
+        difficulty:
+          type: string
+          enum: [Low, Medium, High]
+        expected_impact:
+          type: string
+          enum: [Low, Medium, High]
+        created_at:
+          type: string
+          format: date-time
+
+    GenerateIdeasRequest:
+      type: object
+      required: [idea_type]
+      properties:
+        idea_type:
+          $ref: '#/components/schemas/IdeaType'
+        max_ideas:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 5
+
+    CustomIdeaRequest:
+      type: object
+      required: [prompt, idea_type]
+      properties:
+        prompt:
+          type: string
+        keyword_ids:
+          type: array
+          items:
+            type: integer
+        from_date:
+          type: string
+          format: date
+        to_date:
+          type: string
+          format: date
+        idea_type:
+          $ref: '#/components/schemas/IdeaType'
+
+    ScrapeRunResponse:
+      type: object
+      required: [job_id, accepted_at]
+      properties:
+        job_id:
+          type: string
+        accepted_at:
+          type: string
+          format: date-time
