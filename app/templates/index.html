@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chaat Anna Marketing Intelligence</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Chaat Anna Marketing Intelligence (v2.1)</h1>
+      <p>Keyword-driven events/trends/news/meme/opportunity tracking.</p>
+    </header>
+
+    <main>
+      <section>
+        <h2>Add Keyword</h2>
+        <form id="keyword-form">
+          <input id="keyword" placeholder="festival Chennai" required />
+          <select id="category">
+            <option>Events</option>
+            <option>Trends</option>
+            <option>Food</option>
+            <option>Weather</option>
+            <option>B2B Leads</option>
+            <option>Local</option>
+            <option>Competitor</option>
+            <option>Custom</option>
+          </select>
+          <input id="priority" type="number" min="1" max="5" value="1" />
+          <button type="submit">Add</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Keywords</h2>
+        <button id="refresh-keywords">Refresh</button>
+        <ul id="keyword-list"></ul>
+      </section>
+
+      <section>
+        <h2>Pipeline</h2>
+        <button id="run-scrape">Run Scrape</button>
+        <button id="run-classify">Run Classify</button>
+        <button id="load-content">Load Content</button>
+        <button id="load-digest">Digest Preview</button>
+        <ul id="content-list"></ul>
+        <pre id="digest-view"></pre>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>
