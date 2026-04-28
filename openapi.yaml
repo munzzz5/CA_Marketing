@@ -1,0 +1,148 @@
+openapi: 3.1.0
+info:
+  title: Chaat Anna Marketing Intelligence API
+  version: 2.1.0
+servers:
+  - url: http://localhost:8000
+paths:
+  /keywords:
+    get:
+      summary: List keywords
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create keyword
+      responses:
+        '201':
+          description: Created
+  /keywords/{id}:
+    patch:
+      summary: Update keyword
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete keyword
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: Deleted
+
+  /keyword-groups:
+    get:
+      summary: List keyword groups
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Create keyword group
+      responses:
+        '201': { description: Created }
+
+  /keyword-groups/{group_id}/keywords:
+    get:
+      summary: List keywords in group
+      parameters:
+        - in: path
+          name: group_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Add keyword to group
+      parameters:
+        - in: path
+          name: group_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '201': { description: Created }
+
+  /keyword-groups/{group_id}/keywords/{keyword_id}:
+    delete:
+      summary: Remove keyword from group
+      parameters:
+        - in: path
+          name: group_id
+          required: true
+          schema: { type: integer }
+        - in: path
+          name: keyword_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '204': { description: Deleted }
+
+  /scrape/run:
+    post:
+      summary: Run scraping for active keywords
+      responses:
+        '200': { description: OK }
+
+  /classify/run:
+    post:
+      summary: Classify scraped content
+      responses:
+        '200': { description: OK }
+
+  /scrape/results:
+    get:
+      summary: List scrape results
+      responses:
+        '200': { description: OK }
+
+  /content:
+    get:
+      summary: List content
+      responses:
+        '200': { description: OK }
+
+  /content/{id}:
+    get:
+      summary: Get one content item
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: OK }
+
+  /ideas:
+    get:
+      summary: List ideas
+      responses:
+        '200': { description: OK }
+
+  /ideas/generate/{content_id}:
+    post:
+      summary: Generate ideas for one content item
+      parameters:
+        - in: path
+          name: content_id
+          required: true
+          schema: { type: integer }
+      responses:
+        '201': { description: Created }
+
+  /ideas/custom:
+    post:
+      summary: Generate custom ideas by prompt/filters
+      responses:
+        '201': { description: Created }
+
+  /digest/preview:
+    get:
+      summary: Preview digest sections
+      responses:
+        '200': { description: OK }
