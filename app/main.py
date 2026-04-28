@@ -98,12 +98,13 @@ def patch_keyword(keyword_id: int, payload: KeywordUpdate) -> dict:
     return dict(row)
 
 
-@app.delete("/keywords/{keyword_id}", status_code=204)
-def delete_keyword(keyword_id: int) -> None:
+@app.delete("/keywords/{keyword_id}", status_code=204, response_class=Response)
+def delete_keyword(keyword_id: int) -> Response:
     with get_connection() as conn:
         cursor = conn.execute("DELETE FROM keywords WHERE id = ?", (keyword_id,))
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Keyword not found")
+    return Response(status_code=204)
 
 
 @app.get("/keyword-groups", response_model=list[KeywordGroupOut])
@@ -160,8 +161,12 @@ def list_group_keywords(group_id: int) -> list[dict]:
     return rows_to_dicts(rows)
 
 
-@app.delete("/keyword-groups/{group_id}/keywords/{keyword_id}", status_code=204)
-def remove_keyword_from_group(group_id: int, keyword_id: int) -> None:
+@app.delete(
+    "/keyword-groups/{group_id}/keywords/{keyword_id}",
+    status_code=204,
+    response_class=Response,
+)
+def remove_keyword_from_group(group_id: int, keyword_id: int) -> Response:
     with get_connection() as conn:
         cursor = conn.execute(
             "DELETE FROM keyword_group_members WHERE group_id = ? AND keyword_id = ?",
@@ -169,6 +174,7 @@ def remove_keyword_from_group(group_id: int, keyword_id: int) -> None:
         )
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Membership not found")
+    return Response(status_code=204)
 
 
 @app.post("/scrape/run")

@@ -1,164 +1,85 @@
-# Chaat Anna Promotion & Marketing Intelligence System (v2.0)
+# Chaat Anna Promotion & Marketing Intelligence System (v2.1)
 
-This repository defines the **v2.0 blueprint** for transforming Chaat Anna from a promotion-only assistant into a reusable **marketing intelligence engine**.
+Production-ready starter for a **keyword-driven marketing intelligence engine** with:
 
-## Vision
+- FastAPI backend
+- Browser frontend
+- Separate SQLite database (`data/marketing_intelligence.db`)
+- Docker deployment support
 
-Build a system that behaves like a hybrid of:
+## Added in this review pass
 
-- Google Trends (detect what matters now)
-- CRM opportunity radar (surface B2B leads)
-- Promotion engine (generate actionable campaigns/offers)
+- Keyword groups (FR-34) via `keyword_groups` + membership table.
+- Classification run endpoint (`POST /classify/run`).
+- Digest preview endpoint (`GET /digest/preview`) with all digest sections.
+- Hard duplicate prevention at DB layer using unique index on `(keyword_id, source_url)`.
+- Dockerfile + docker-compose for one-command deployment.
 
-Core design rule:
+## Core functionality
 
-> **No hardcoded events, trends, or campaign triggers**. Everything flows from configured keywords.
+- Dynamic keyword CRUD
+- Keyword grouping and group membership management
+- Scrape run across active keywords
+- Content storage, dedupe, relevance scoring
+- Classification and content retrieval
+- Idea generation (content based + custom prompt)
+- Digest summary generation
 
-## End-to-End Flow
+## Local run
 
-1. Keywords Defined
-2. Scraping Engine Runs
-3. Content Stored
-4. AI Classifies Content
-5. AI Generates Ideas (Offers / Campaigns / Leads)
-6. Ideas Stored
-7. Email Digest Sent
-8. Team Executes
-9. Sales Data Captured
-10. Impact Analysis
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
----
+- UI: `http://127.0.0.1:8000/`
+- Swagger: `http://127.0.0.1:8000/docs`
 
-## Functional Requirements
+## Docker run
 
-### Keyword Management Module
+```bash
+docker compose up --build
+```
 
-- **FR-31**: Add keywords dynamically.
-- **FR-32**: Each keyword captures:
-  - keyword text
-  - category
-  - priority
-  - active/inactive flag
-- **FR-33**: Edit/delete keywords.
-- **FR-34**: Group keywords.
+- App URL: `http://127.0.0.1:8000/`
+- Persistent DB volume: `./data:/app/data`
 
-Supported categories:
-
-- Events
-- Trends
-- Food
-- Weather
-- B2B Leads
-- Local
-- Competitor
-- Custom
-
-### Keyword-Based Scraping Engine
-
-- **FR-35**: Run scraping across all active keywords.
-- **FR-36**: Store scraped results as structured data.
-- **FR-37**: Every record includes title, description, source, date, and matched keyword.
-- **FR-38**: Deduplicate entries.
-- **FR-39**: Assign relevance score.
-
-### Content Classification Module
-
-- **FR-40**: Classify into Event / Trend / News / Meme / Opportunity.
-- **FR-41**: Link classified content to keywords.
-- **FR-42**: Prioritize high-impact items.
-
-### Multi-Purpose Idea Generation
-
-- **FR-43**: Generate promotional offers, campaign ideas, social hooks, and B2B sales ideas.
-- **FR-44**: Make output type selectable.
-- **FR-45**: Store generated ideas separately.
-
-### Custom Prompt Engine
-
-- **FR-46**: Accept user custom prompt.
-- **FR-47**: Let user choose keywords, time range, and idea type.
-- **FR-48**: Generate output accordingly.
-
----
-
-## API Surface (v2)
+## API surface
 
 ### Keywords
-
 - `GET /keywords`
 - `POST /keywords`
 - `PATCH /keywords/{id}`
 - `DELETE /keywords/{id}`
 
-### Scraping
+### Keyword Groups
+- `GET /keyword-groups`
+- `POST /keyword-groups`
+- `POST /keyword-groups/{group_id}/keywords`
+- `GET /keyword-groups/{group_id}/keywords`
+- `DELETE /keyword-groups/{group_id}/keywords/{keyword_id}`
 
+### Scrape + Classification
 - `POST /scrape/run`
+- `POST /classify/run`
 - `GET /scrape/results`
 
 ### Content
-
 - `GET /content`
 - `GET /content/{id}`
 
 ### Idea Generation
-
 - `POST /ideas/generate/{content_id}`
 - `POST /ideas/custom`
 - `GET /ideas`
 
-See `openapi.yaml` for request/response structure.
+### Digest
+- `GET /digest/preview`
 
----
+## Strategic rule
 
-## Scheduling
+Do not hardcode events/trends/hooks in code. Use:
 
-Run on **every alternate Sunday**:
-
-1. Fetch active keywords
-2. Execute scraping
-3. Persist content
-4. Run classification
-5. Generate ideas
-6. Send digest
-
----
-
-## Email Digest Contents
-
-1. Upcoming events
-2. Trending topics
-3. Meme opportunities
-4. Campaign ideas
-5. Offer suggestions
-6. B2B opportunities
-
----
-
-## Starter Seed Keywords
-
-### Events
-- festival Chennai
-- Tamil Nadu holidays
-- India food days
-
-### Trends
-- viral Tamil meme
-- Instagram trending India
-- Chennai trending topics
-
-### Weather
-- rain Chennai forecast
-- Chennai temperature heatwave
-
-### B2B Leads
-- IT companies Chennai events
-- corporate office Chennai
-- employee engagement programs
-
----
-
-## Repository Assets
-
-- `schema.sql` — relational schema for keywords/content/ideas
-- `openapi.yaml` — endpoint contracts for v2 APIs
-- `scheduler.md` — alternate-Sunday workflow guidance
+**Keywords → Data → Classification/Ideas → Action**
