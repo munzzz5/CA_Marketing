@@ -1,0 +1,50 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f6f8fb;
+  color: #1f2937;
+}
+
+header {
+  background: #0f766e;
+  color: white;
+  padding: 16px 24px;
+}
+
+main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+section {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+form {
+  display: grid;
+  gap: 8px;
+}
+
+input,
+select,
+button {
+  padding: 8px;
+}
+
+ul {
+  padding-left: 18px;
+}
+
+pre {
+  max-height: 240px;
+  overflow: auto;
+  background: #111827;
+  color: #e5e7eb;
+  padding: 8px;
+  border-radius: 6px;
+}

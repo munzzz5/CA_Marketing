@@ -1,0 +1,10 @@
+version: '3.9'
+services:
+  api:
+    build: .
+    container_name: chaat-anna-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
